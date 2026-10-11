@@ -2,6 +2,11 @@ function notImplemented() {
   throw new Error("Корзина ещё не реализована. Сначала прочитайте тесты.");
 }
 
+const MIN_SUBTOTAL_FOR_FREE_DELIVERY = 50000;
+const DELIVERY_PRICE = 30000;
+const MIN_SUBTOTAL_FOR_DISCOUNT = 20000;
+const SAVE10_DISCOUNT_RATE = 0.1;
+
 function addToCart(cart, product, quantity) {
   if (quantity <= 0) {
     throw new RangeError("Количество должно быть положительным.");
@@ -48,8 +53,25 @@ function calculateCartSubtotal(cart) {
   );
 }
 
-function calculateOrderTotal() {
-  return notImplemented();
+function calculateOrderTotal(cart, promoCode) {
+  const subtotal = calculateCartSubtotal(cart);
+
+  const isEligibleForDiscount =
+    promoCode === "SAVE10" && subtotal >= MIN_SUBTOTAL_FOR_DISCOUNT;
+
+  const discount = isEligibleForDiscount
+    ? Math.round(subtotal * SAVE10_DISCOUNT_RATE)
+    : 0;
+
+  const delivery =
+    subtotal < MIN_SUBTOTAL_FOR_FREE_DELIVERY ? DELIVERY_PRICE : 0;
+
+  return {
+    subtotal,
+    discount,
+    delivery,
+    total: subtotal - discount + delivery,
+  };
 }
 
 const cartApi = {
